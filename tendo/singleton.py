@@ -6,7 +6,7 @@ import tempfile
 import unittest
 import logging
 from multiprocessing import Process
-
+import fcntl
 
 class SingleInstanceException(BaseException):
     pass
@@ -28,7 +28,6 @@ class SingleInstance:
     """
 
     def __init__(self, flavor_id=""):
-        import sys
         self.initialized = False
         basename = os.path.splitext(os.path.abspath(sys.argv[0]))[0].replace(
             "/", "-").replace(":", "").replace("\\", "-") + '-%s' % flavor_id + '.lock'
@@ -54,7 +53,6 @@ class SingleInstance:
                 print(e.errno)
                 raise
         else:  # non Windows
-            import fcntl
             self.fp = open(self.lockfile, 'w')
             self.fp.flush()
             try:
@@ -66,8 +64,6 @@ class SingleInstance:
         self.initialized = True
 
     def __del__(self):
-        import sys
-        import os
         if not self.initialized:
             return
         try:
